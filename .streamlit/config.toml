@@ -1,0 +1,16 @@
+[global]
+# Supress warning when multiprocessing and running CLI
+showWarningOnDirectExecution = false
+
+[server]
+port = 8080
+runOnSave = true
+headless = true # Run Streamlit in headless mode so it doesn't automatically open a browser window
+
+[theme]
+base="light" # Always use light theme for visualizations
+
+[logger]
+# Level of logging: 'error', 'warning', 'info', or 'debug'.
+# Default: 'info'
+level = "info"
