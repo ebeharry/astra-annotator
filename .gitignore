@@ -5,6 +5,7 @@ CLAUDE.md
 
 # Data Files
 *.db
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -16,7 +16,7 @@ class OpenAIProvider(LLMProvider):
         api_key: str = None,
         model: str = "gpt-4",
         max_tokens: Optional[int] = None,
-        temperature: float = 0.7,
+        temperature: float = 1.0,
     ):
         api_key = api_key or os.getenv("OPENAI_API_KEY")
         if not api_key:
@@ -32,8 +32,12 @@ class OpenAIProvider(LLMProvider):
         data = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": kwargs.get("temperature", self.temperature),
         }
+
+        # Only add temperature if it's not the default (some models like GPT-5 don't support custom temperature)
+        temperature = kwargs.get("temperature", self.temperature)
+        if temperature != 1.0:  # 1.0 is the default for OpenAI models
+            data["temperature"] = temperature
 
         # Only add max_tokens if specified
         max_tokens = kwargs.get("max_tokens", self.max_tokens)
