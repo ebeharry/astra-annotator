@@ -293,7 +293,7 @@ class LLMProvider(ABC):
     @abstractmethod
     async def generate_response(self, prompt: str, **kwargs) -> Dict[str, Any]:
         """Generate response from LLM provider.
-        
+
         Returns:
             {
                 'response': str,
@@ -303,7 +303,7 @@ class LLMProvider(ABC):
             }
         """
         pass
-    
+
     @abstractmethod
     def validate_credentials(self) -> bool:
         """Validate API credentials."""
@@ -313,7 +313,7 @@ class OpenAIProvider(LLMProvider):
     def __init__(self, api_key: str, model: str = "gpt-4"):
         self.api_key = api_key
         self.model = model
-    
+
     async def generate_response(self, prompt: str, **kwargs) -> Dict[str, Any]:
         # Implementation for OpenAI API calls
         pass
@@ -332,7 +332,7 @@ class DatabaseManager:
     def __init__(self, db_path: str):
         self.db_path = db_path
         self.init_database()
-    
+
     @contextmanager
     def get_connection(self):
         conn = sqlite3.connect(self.db_path, check_same_thread=False)
@@ -341,22 +341,22 @@ class DatabaseManager:
             yield conn
         finally:
             conn.close()
-    
-    def create_prompt(self, group_id: int, content: str, 
+
+    def create_prompt(self, group_id: int, content: str,
                      communication_style: str, severity: str,
                      additional_labels: Optional[Dict] = None) -> int:
         """Create new prompt and return ID."""
         pass
-    
+
     def get_prompts(self, filters: Optional[Dict] = None) -> List[Dict]:
         """Retrieve prompts with optional filtering."""
         pass
-    
-    def create_experiment(self, name: str, description: str, 
+
+    def create_experiment(self, name: str, description: str,
                          models: List[str], prompt_ids: List[int]) -> int:
         """Create experiment and return ID."""
         pass
-    
+
     def update_response_status(self, response_id: int, status: str,
                               response_text: Optional[str] = None,
                               error_message: Optional[str] = None):
@@ -385,7 +385,7 @@ class RetryHandler:
     def __init__(self, max_retries: int = 3, base_delay: float = 1.0):
         self.max_retries = max_retries
         self.base_delay = base_delay
-    
+
     async def execute_with_retry(self, func: Callable, *args, **kwargs) -> Any:
         for attempt in range(self.max_retries + 1):
             try:
@@ -394,7 +394,7 @@ class RetryHandler:
                 if attempt == self.max_retries:
                     logging.error(f"Final attempt failed: {e}")
                     raise
-                
+
                 delay = self.base_delay * (2 ** attempt)
                 logging.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s")
                 await asyncio.sleep(delay)
@@ -428,22 +428,22 @@ class CSVValidator:
     REQUIRED_COLUMNS = ['content', 'communication_style', 'severity', 'condition']
     VALID_COMMUNICATION_STYLES = ['implicit', 'neutral', 'explicit']
     VALID_SEVERITIES = ['low', 'moderate', 'high']
-    
+
     def validate_csv(self, df: pd.DataFrame) -> Dict[str, Any]:
         errors = []
         warnings = []
-        
+
         # Check required columns
         missing_cols = set(self.REQUIRED_COLUMNS) - set(df.columns)
         if missing_cols:
             errors.append(f"Missing required columns: {missing_cols}")
-        
+
         # Validate enum values
         if 'communication_style' in df.columns:
             invalid_styles = df[~df['communication_style'].isin(self.VALID_COMMUNICATION_STYLES)]
             if not invalid_styles.empty:
                 errors.append(f"Invalid communication styles found: {invalid_styles['communication_style'].unique()}")
-        
+
         return {
             'valid': len(errors) == 0,
             'errors': errors,
@@ -469,7 +469,7 @@ class TestDatabaseManager:
             db_path = tmp.name
         yield DatabaseManager(db_path)
         os.unlink(db_path)
-    
+
     def test_create_prompt(self, db_manager):
         group_id = db_manager.create_prompt_group("Test Condition", "Test description")
         prompt_id = db_manager.create_prompt(
@@ -479,7 +479,7 @@ class TestDatabaseManager:
             severity="moderate"
         )
         assert prompt_id > 0
-    
+
     def test_get_prompts_with_filter(self, db_manager):
         # Setup test data
         # Test filtering functionality
@@ -495,7 +495,7 @@ class TestLLMProviders:
         provider = OpenAIProvider(api_key="test_key")
         # Test various scenarios: success, failure, rate limiting
         pass
-    
+
     def test_provider_credential_validation(self):
         # Test credential validation for all providers
         pass
@@ -509,7 +509,7 @@ class TestAnalytics:
         # Test percentage agreement
         # Test with various annotation scenarios
         pass
-    
+
     def test_statistics_generation(self):
         # Test distribution calculations
         # Test significance testing
@@ -590,4 +590,4 @@ class TestAnalytics:
 1. **Model Comparison**: Standardized benchmarking across LLM providers
 2. **Bias Detection**: Automated detection of demographic or content biases in responses
 3. **Quality Metrics**: Automated response quality assessment to complement human annotations
-4. **Longitudinal Studies**: Support for tracking model performance changes over time 
+4. **Longitudinal Studies**: Support for tracking model performance changes over time

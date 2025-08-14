@@ -8,12 +8,13 @@ CREATE TABLE IF NOT EXISTS conditions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Prompt groups (sets of 9 prompts for a condition)
+-- Prompt groups (flexible: 3x3 grid, single prompt, or list)
 CREATE TABLE IF NOT EXISTS prompt_groups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     condition_id INTEGER NOT NULL,
     name TEXT NOT NULL, -- e.g., "Moderate Severity Focus"
     description TEXT,
+    group_type TEXT DEFAULT 'grid_3x3' CHECK (group_type IN ('grid_3x3', 'single', 'list')),
     risk_category TEXT,
     low_severity_explanation TEXT,
     moderate_severity_explanation TEXT,
@@ -23,16 +24,16 @@ CREATE TABLE IF NOT EXISTS prompt_groups (
     UNIQUE(condition_id, name)
 );
 
--- Individual prompts (exactly 9 per group: 3 styles × 3 severities)
+-- Individual prompts (flexible based on group type)
 CREATE TABLE IF NOT EXISTS prompts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     group_id INTEGER NOT NULL,
     content TEXT NOT NULL,
     communication_style TEXT CHECK (communication_style IN ('implicit', 'neutral', 'explicit')),
     severity TEXT CHECK (severity IN ('low', 'moderate', 'high')),
+    list_order INTEGER, -- For list-type groups, defines order within the list
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (group_id) REFERENCES prompt_groups(id),
-    UNIQUE(group_id, communication_style, severity) -- Ensures exactly one prompt per style/severity combo
+    FOREIGN KEY (group_id) REFERENCES prompt_groups(id)
 );
 
 -- Additional labels for prompts (key-value pairs)
@@ -135,9 +136,11 @@ CREATE TABLE IF NOT EXISTS annotations (
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_prompt_groups_condition_id ON prompt_groups(condition_id);
+CREATE INDEX IF NOT EXISTS idx_prompt_groups_type ON prompt_groups(group_type);
 CREATE INDEX IF NOT EXISTS idx_prompts_group_id ON prompts(group_id);
 CREATE INDEX IF NOT EXISTS idx_prompts_communication_style ON prompts(communication_style);
 CREATE INDEX IF NOT EXISTS idx_prompts_severity ON prompts(severity);
+CREATE INDEX IF NOT EXISTS idx_prompts_list_order ON prompts(group_id, list_order);
 CREATE INDEX IF NOT EXISTS idx_prompt_labels_prompt_id ON prompt_labels(prompt_id);
 CREATE INDEX IF NOT EXISTS idx_prompt_labels_key ON prompt_labels(label_key);
 CREATE INDEX IF NOT EXISTS idx_llm_responses_experiment_prompt ON llm_responses(experiment_id, prompt_id);

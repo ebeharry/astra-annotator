@@ -3,7 +3,7 @@
 showWarningOnDirectExecution = false
 
 [server]
-port = 8080
+port = 8051
 runOnSave = true
 headless = true # Run Streamlit in headless mode so it doesn't automatically open a browser window
 

@@ -1,13 +1,7 @@
 """Managers module for Astra Annotator."""
 
+from .annotation import AnnotationManager
 from .experiment import ExperimentManager
 from .prompt import PromptManager
-from .annotation import AnnotationManager
-from .analytics import AnalyticsManager
 
-__all__ = [
-    'ExperimentManager',
-    'PromptManager', 
-    'AnnotationManager',
-    'AnalyticsManager'
-]
+__all__ = ["ExperimentManager", "PromptManager", "AnnotationManager"]
