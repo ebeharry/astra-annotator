@@ -2,17 +2,42 @@
 
 import json
 import logging
+import os
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import turso_serverless
+
+
+def _get_turso_credentials() -> tuple[Optional[str], Optional[str]]:
+    """Resolve Turso connection credentials from environment variables or Streamlit
+    secrets. Returns (None, None) if neither is configured, in which case the
+    manager falls back to a local SQLite file - this keeps local development
+    working without requiring a Turso account."""
+    url = os.environ.get("TURSO_DATABASE_URL")
+    token = os.environ.get("TURSO_AUTH_TOKEN")
+    if url and token:
+        return url, token
+
+    try:
+        import streamlit as st
+
+        url = url or st.secrets.get("TURSO_DATABASE_URL")
+        token = token or st.secrets.get("TURSO_AUTH_TOKEN")
+    except Exception:
+        pass
+
+    return url, token
+
 
 class DatabaseManager:
-    """Manages SQLite database operations for Astra Annotator."""
+    """Manages database operations for Astra Annotator (SQLite locally, Turso when configured)."""
 
     def __init__(self, db_path: str = "astra_annotator.db"):
         self.db_path = db_path
+        self._turso_url, self._turso_token = _get_turso_credentials()
         self.init_database()
 
     def init_database(self):
@@ -28,8 +53,12 @@ class DatabaseManager:
     @contextmanager
     def get_connection(self):
         """Get database connection with proper cleanup."""
-        conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
+        if self._turso_url and self._turso_token:
+            conn = turso_serverless.connect(self._turso_url, auth_token=self._turso_token)
+            conn.row_factory = turso_serverless.Row
+        else:
+            conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
         try:
             yield conn
         finally:

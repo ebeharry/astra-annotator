@@ -147,6 +147,9 @@ celerybeat.pid
 .env
 .envrc
 .venv
+
+# Streamlit secrets (Turso credentials, etc.) - never commit
+.streamlit/secrets.toml
 env/
 venv/
 ENV/
