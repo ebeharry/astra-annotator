@@ -5,6 +5,7 @@ from typing import Dict, List
 
 import streamlit as st
 
+from apps.context_formatting import render_claim_context
 from core.database import DatabaseManager
 from core.managers.annotation import AnnotationManager
 
@@ -221,15 +222,13 @@ def show_annotation_interface(annotation_manager: AnnotationManager, db: Databas
             st.write(f"**Condition:** {current_response['condition_name']}")
 
     # Display conversation
-    st.write("**Conversation to Evaluate:**")
+    st.write("**Claim to Evaluate:**")
 
     with st.container():
-        # Patient message
-        st.markdown("**Patient:**")
-        st.info(prompt_content)
+        with st.expander("📄 Context (ground truth, prior turns, user question)", expanded=True):
+            render_claim_context(prompt_content)
 
-        # Assistant response
-        st.markdown("**Assistant:**")
+        st.markdown("**Statement Under Review:**")
         response_text = current_response["response_text"] or "No response generated"
         st.success(response_text)
 
@@ -237,6 +236,7 @@ def show_annotation_interface(annotation_manager: AnnotationManager, db: Databas
 
     # Assessment categories
     st.subheader("📝 Assessment Categories")
+    st.info("For each deception type below, choose the option that best describes the statement, based on the context above.")
 
     if run_details["guidelines"]:
         with st.expander("📖 General Guidelines"):
@@ -259,7 +259,7 @@ def show_annotation_interface(annotation_manager: AnnotationManager, db: Databas
             st.write(f"**{category['name']}**")
 
             if category["guidelines"]:
-                st.write(f"*{category['guidelines']}*")
+                st.markdown(category["guidelines"])
 
             # Get existing value
             existing_annotation = existing_annotations.get(category["id"])

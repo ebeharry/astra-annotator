@@ -4,6 +4,7 @@ import json
 
 import streamlit as st
 
+from apps.context_formatting import render_claim_context
 from core.database import DatabaseManager
 from core.managers.annotation import AnnotationManager
 from core.managers.experiment import ExperimentManager
@@ -405,23 +406,23 @@ def show_preview_interface(annotation_manager: AnnotationManager, db: DatabaseMa
             )
             prompt_content = cursor.fetchone()["content"]
 
-        st.write("**Sample Prompt-Response Pair:**")
+        st.write("**Sample Claim:**")
 
-        # Display in chat-like format
         with st.container():
-            st.markdown("**Patient:**")
-            st.info(prompt_content)
+            with st.expander("📄 Context (ground truth, prior turns, user question)", expanded=True):
+                render_claim_context(prompt_content)
 
-            st.markdown("**Assistant:**")
+            st.markdown("**Statement Under Review:**")
             st.success(sample_response["response_text"] or "No response generated")
 
         # Show assessment categories
         st.write("**Assessment Categories:**")
+        st.info("For each deception type below, choose the option that best describes the statement, based on the context above.")
 
         for category in run_details["assessment_categories"]:
             st.write(f"**{category['name']}**")
             if category["guidelines"]:
-                st.write(f"*{category['guidelines']}*")
+                st.markdown(category["guidelines"])
 
             if category["type"] == "categorical":
                 st.radio(

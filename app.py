@@ -14,7 +14,7 @@ st.set_page_config(
 def main():
     """Main application entry point."""
     st.title("🧠 Astra Annotator")
-    st.subheader("Mental Health LLM Evaluation Platform")
+    st.subheader("Deception Benchmark Annotation Platform")
 
     # Initialize session state
     if "db_path" not in st.session_state:
@@ -66,11 +66,11 @@ def show_home_page():
     st.markdown("""
     ## Welcome to Astra Annotator
 
-    This platform helps you create and manage expert annotations for LLM responses in mental health contexts.
+    This platform helps you create and manage expert annotations for LLM claims in deception-benchmark contexts.
 
     ### Workflow Overview:
 
-    1. **📝 Prompt Management**: Create and organize prompts by mental health conditions
+    1. **📝 Prompt Management**: Create and organize claim context by scenario
     2. **🧪 Experiment Management**: Run prompts through multiple LLM models
     3. **⚙️ Annotation Setup**: Configure assessment categories and labeling guidelines
     4. **🏷️ Labeling Interface**: Blind annotation interface for expert reviewers
