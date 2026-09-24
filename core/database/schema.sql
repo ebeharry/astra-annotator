@@ -147,3 +147,9 @@ CREATE INDEX IF NOT EXISTS idx_llm_responses_experiment_prompt ON llm_responses(
 CREATE INDEX IF NOT EXISTS idx_llm_responses_status ON llm_responses(status);
 CREATE INDEX IF NOT EXISTS idx_annotations_run_labeler ON annotations(annotation_run_id, labeler_initials);
 CREATE INDEX IF NOT EXISTS idx_annotations_response_category ON annotations(response_id, category_id);
+
+-- Enforces one annotation per (run, response, category, labeler); without this,
+-- INSERT OR REPLACE in save_annotation() has no conflict to resolve against and
+-- silently inserts a duplicate row instead of overwriting on every re-save.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_annotations_unique_submission
+    ON annotations(annotation_run_id, response_id, category_id, labeler_initials);
