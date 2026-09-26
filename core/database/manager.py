@@ -353,9 +353,10 @@ class DatabaseManager:
 
             # Get prompts
             cursor = conn.execute(
-                """SELECT p.*, pg.name as group_name
+                """SELECT p.*, pg.name as group_name, c.name as condition_name
                    FROM prompts p
                    JOIN prompt_groups pg ON p.group_id = pg.id
+                   JOIN conditions c ON pg.condition_id = c.id
                    JOIN experiment_prompts ep ON p.id = ep.prompt_id
                    WHERE ep.experiment_id = ?""",
                 (experiment_id,),
