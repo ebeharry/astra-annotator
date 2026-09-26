@@ -40,6 +40,11 @@ def show_disagreement_review():
     run_id = selected_run[0]
     run_details = annotation_manager.get_annotation_run_details(run_id)
 
+    if run_details["guidelines"]:
+        with st.sidebar:
+            st.subheader("📖 General Guidelines")
+            st.write(run_details["guidelines"])
+
     annotations_df = get_annotations_dataframe(run_id, db)
     if annotations_df.empty:
         st.warning("No annotations found for this run")

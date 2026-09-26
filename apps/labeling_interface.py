@@ -234,13 +234,14 @@ def show_annotation_interface(annotation_manager: AnnotationManager, db: Databas
 
     st.divider()
 
+    if run_details["guidelines"]:
+        with st.sidebar:
+            st.subheader("📖 General Guidelines")
+            st.write(run_details["guidelines"])
+
     # Assessment categories
     st.subheader("📝 Assessment Categories")
     st.info("For each deception type below, choose the option that best describes the statement, based on the context above.")
-
-    if run_details["guidelines"]:
-        with st.expander("📖 General Guidelines"):
-            st.write(run_details["guidelines"])
 
     # Get existing annotations for this response
     existing_annotations = {}
