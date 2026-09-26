@@ -30,6 +30,7 @@ def main():
         "⚙️ Annotation Setup": "annotation_setup",
         "🏷️ Labeling Interface": "labeling",
         "📊 Results Analysis": "results",
+        "🔍 Disagreement Review": "disagreement_review",
     }
 
     selected_page = st.sidebar.selectbox("Select Page", list(apps.keys()), index=0)
@@ -59,6 +60,10 @@ def main():
         from apps.results_analysis import show_results_analysis
 
         show_results_analysis()
+    elif page_name == "disagreement_review":
+        from apps.disagreement_review import show_disagreement_review
+
+        show_disagreement_review()
 
 
 def show_home_page():
