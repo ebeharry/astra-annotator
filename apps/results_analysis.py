@@ -354,7 +354,8 @@ def show_detailed_analysis(
 
         # Option to export disagreement cases
         if st.button("📥 Export Disagreement Cases"):
-            csv = disagreement_responses.to_csv(index=False)
+            export_df = build_disagreement_export(filtered_df, disagreement_responses)
+            csv = export_df.to_csv(index=False)
             st.download_button(
                 label="Download Disagreement Cases CSV",
                 data=csv,
@@ -671,6 +672,37 @@ def find_disagreement_responses(df: pd.DataFrame) -> pd.DataFrame:
                 )
 
     return pd.DataFrame(disagreements)
+
+
+def build_disagreement_export(df: pd.DataFrame, disagreement_responses: pd.DataFrame) -> pd.DataFrame:
+    """Build a detailed export of disagreement cases with one row per labeler.
+
+    Includes the full prompt text, each labeler's value, and their justification
+    (if given) for every response/category pair flagged as a disagreement.
+    """
+    disagreement_keys = disagreement_responses[["response_id", "category_id"]]
+
+    detail = df.merge(disagreement_keys, on=["response_id", "category_id"], how="inner")
+
+    columns = [
+        "response_id",
+        "model",
+        "category_name",
+        "prompt_content",
+        "labeler_initials",
+        "value",
+        "justification",
+    ]
+    available_columns = [col for col in columns if col in detail.columns]
+
+    export_df = detail[available_columns].sort_values(["response_id", "category_name", "labeler_initials"])
+    return export_df.rename(
+        columns={
+            "prompt_content": "prompt",
+            "labeler_initials": "labeler",
+            "justification": "reason",
+        }
+    )
 
 
 def generate_export_data(
