@@ -674,6 +674,15 @@ def find_disagreement_responses(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(disagreements)
 
 
+def flatten_text(series: pd.Series) -> pd.Series:
+    """Collapse embedded line breaks so a field renders as one CSV line.
+
+    Multi-line prompt/response/justification text otherwise displays as just
+    its first line in viewers that don't expand quoted multi-line CSV cells.
+    """
+    return series.fillna("").astype(str).str.replace(r"\r\n|\r|\n", " | ", regex=True).str.strip()
+
+
 def build_disagreement_export(df: pd.DataFrame, disagreement_responses: pd.DataFrame) -> pd.DataFrame:
     """Build a detailed export of disagreement cases with one row per labeler.
 
@@ -695,7 +704,12 @@ def build_disagreement_export(df: pd.DataFrame, disagreement_responses: pd.DataF
     ]
     available_columns = [col for col in columns if col in detail.columns]
 
-    export_df = detail[available_columns].sort_values(["response_id", "category_name", "labeler_initials"])
+    export_df = detail[available_columns].sort_values(["response_id", "category_name", "labeler_initials"]).copy()
+
+    for col in ("prompt_content", "justification"):
+        if col in export_df.columns:
+            export_df[col] = flatten_text(export_df[col])
+
     return export_df.rename(
         columns={
             "prompt_content": "prompt",
